@@ -1,0 +1,22 @@
+{
+  "name": "amazon-client",
+  "version": "1.0.0",
+  "description": "The project description",
+  "main": ".eslintrc.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tctrautman/hrsf84-thesis.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tctrautman/hrsf84-thesis/issues"
+  },
+  "homepage": "https://github.com/tctrautman/hrsf84-thesis#readme",
+  "dependencies": {
+    "node": "^9.2.0"
+  }
+}
