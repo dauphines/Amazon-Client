@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+// add mongoose
 
 // Home page
 app.get('/', (req, res) => res.send('Hello World!'));

@@ -17,7 +17,9 @@
   },
   "homepage": "https://github.com/tctrautman/hrsf84-thesis#readme",
   "dependencies": {
+    "body-parser": "^1.18.2",
     "express": "^4.16.2",
+    "faker": "^4.1.0",
     "mongodb": "^3.0.0-rc0",
     "mongoose": "^4.13.7",
     "node": "^9.2.0"
