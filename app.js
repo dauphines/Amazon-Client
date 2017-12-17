@@ -17,4 +17,21 @@ app.get('/product/', (req, res) => {
 
 });
 
+// Add to cart
+// To do: add product id
+app.post('/cart/add/', (req, res) => {
+
+});
+
+
+// Remove from cart
+// To do: add product id
+app.post('/cart/remove/', (req, res) => {
+
+});
+
+
+// Make purhcase
+
+
 app.listen(7331, () => console.log('Amazon Client app listening on port 3000!'));

@@ -6,6 +6,8 @@ mongoose.connect('mongodb://localhost/cart', {useMongoClient: true});
 
 var db = mongoose.connection;
 
+
+// This is currently out of date.  Need to 
 var cartSchema = mongoose.Schema({
   userId: Number,
   products: [
