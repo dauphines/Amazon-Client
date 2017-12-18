@@ -15,14 +15,6 @@ var getProdObj = () => {
   return [obj];
 };
 
-// var getProducts = () => {
-//   var output = [];
-//   for (var i = 0; i < Math.floor(Math.random() * 2) + 1; i++) {
-//     output.push(getProdObj());
-//   }
-//   return output;
-// };
-
 var cartObj = () => {
   var obj = {
     userId: faker.random.uuid(),
@@ -33,6 +25,16 @@ var cartObj = () => {
     cartTotal: faker.finance.amount(),
     primeTrialSignup: faker.random.boolean(),
     shippingAddress: {
+      addressLine1: faker.address.streetAddress() + ' ' + faker.address.streetName(),
+      addressLine2: faker.address.secondaryAddress(),
+      city: faker.address.city(),
+      state: faker.address.state(),
+      zip: faker.address.zipCode(),
+      country: faker.address.country(),
+    },
+    // Billing address was added after files were generated...
+    // ...but should be included in future runs of this file.
+    billingAddress: {
       addressLine1: faker.address.streetAddress() + ' ' + faker.address.streetName(),
       addressLine2: faker.address.secondaryAddress(),
       city: faker.address.city(),
@@ -53,19 +55,6 @@ stream.once('open', (fd) => {
         console.log(i);
       }
     }
-    // Important to close the stream when you're ready
     stream.end();
     console.log('done');
 });
-
-// var getCarts = () => {
-//   for (var i = 0; i < 2500000; i++) {
-//     i % 10000 === 0 ? console.log('iteration:', i) : null;
-//     jsonfile.writeFileSync('fakeCarts.json', cartObj(), {flag: 'a'});
-//   }
-// };
-
-// getCarts();
-
-// fs.createWriteStream
-// 
