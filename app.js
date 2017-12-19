@@ -4,7 +4,7 @@ const apm = require('elastic-apm-node').start({
 });
 const express = require('express');
 const app = express();
-// add bluebird
+const Promise = require('bluebird');
 // add urlParser
 const bodyParser = require('body-parser');
 const mongo = require('./mongoose-helpers.js');
@@ -12,6 +12,9 @@ const mongo = require('./mongoose-helpers.js');
 // ============= MIDDLEWARE ==============
 app.use(bodyParser);
 app.use(urlParser);
+
+// ============= LOADTESTING =============
+app.user(apm.middleware.express());
 
 // ============= CLIENT APP ==============
 
@@ -31,39 +34,28 @@ app.get('/product/', (req, res) => {
 });
 
 // Add to cart
-// To do: add product id
-// NOTE: maybe we don't need to insert product Id
-// NOTE: maybe it would be more effective to include user_id in path
-app.post('/cart/add/', (req, res) => {
-  // parse product object
-  mongo.addToCart(req.userId, req.product);
-  // find user's cart object in mongoDB via userId
-    // access the user's products property
-    // push this product object into user's cart prop
-    // iterate through user's cart's products prop and calculate the total
-    // reset the cartTotal with the total price of all products
-
+app.put('/cart/add/', (req, res) => {
+  mongo.addToCart(req.body.userId, req.body.product)
+    .then(() => {
+      res.send(201);
+    })
+    .catch(() => {
+      // need to insert the correct 
+      res.send(501);
+    });
+  req.body.product.productName === 'teapot' ? res.send(418) : null;
 });
 
 
 // Remove from cart
-// To do: add product id
-// NOTE: this might be doable with a GET request, which would take less data
-// NOTE: it might make sense to move products from an array over to an object
-// ...to enable constant time access to each prop & simplify removal.
-app.post('/cart/remove/', (req, res) => {
-  // parse the productId
-  // parse the userId
-  // find the user's cart object in MongoDB via userID
-  mongo.removeFromCart(req.userId, req.productId);
-    // access the user's products prop
-    // init prodInd
-    // iterate through products, giving access to index
-      // if the given product's Id is equal to the productId we're looking for
-        // set prodInd to index
-    // remove the product at prodInd
-    // calculate the total of all current products
-    // set the cartTotal to the current total
+app.put('/cart/remove/', (req, res) => {
+  mongo.removeFromCart(req.userId, req.productId)
+    .then(() => {
+      res.send(201);
+    })
+    .catch(() => {
+      res.send(501);
+    });
 });
 
 

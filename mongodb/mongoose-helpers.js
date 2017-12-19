@@ -1,26 +1,49 @@
-// require mongoose.js
 var mongoose = require('mongoose.js');
 
 var addToCart = (userId, prod) => {
-  // find user's cart object in mongoDB via userId
-
-  // access the user's products property
-  // push this product object into user's cart prop
-  // iterate through user's cart's products prop and calculate the total
-  // reset the cartTotal with the total price of all products
+  var newTotal;
+  // Can we push new product docs within the below function?
+  Carts.findById(userId)
+    .then((cartObj) => {
+      // We probably need a new another .then after this first line...
+      // ...since it's an async function.
+      cartObj.products.push(prod);
+      cartObj.produts.forEach((productObj) => {
+        newTotal += productObj.price;
+      });
+      cartObj.cartTotal = newTotal;
+      return cartObj.cartTotal;
+    })
+    // Do we need to change anything to make this error handling get...
+    //... picked up by Kibana?
+    .catch((err) => {
+      throw err;
+    });
 };
 
 var removeFromCart = (userId, productId) => {
+  var newTotal;
+
   // find the user's cart object in MongoDB via userID
+  Carts.findById(userId)
   // access the user's products prop
-  // init prodInd
-  // iterate through products, giving access to index
-    // if the given product's Id is equal to the productId we're looking for
-      // set prodInd to index
   // remove the product at prodInd
-  // calculate the total of all current products
-  // set the cartTotal to the current total
+    .then((cartObj) => {
+      // We probably need to add a .then after the first line.
+      cartObj.products.pull(productId);
+
+      // calculate the total of all current products
+      cartObj.products.forEach((product) => {
+        newTotal += product.price;
+      });
+      // set the cartTotal to the current total
+      cartObj.cartTotal = newTotal;
+      return cartObj.cartTotal;
+    })
+    .catch((err) => {
+      throw err;
+    });
 };
 
-modeule.exports.addToCart = addToCart;
-modeule.exports.removeFromCart = removeFromCart;
+module.exports.addToCart = addToCart;
+module.exports.removeFromCart = removeFromCart;
