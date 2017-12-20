@@ -1,9 +1,9 @@
-var mongoose = require('mongoose.js');
+var { Carts, Products } = require('./mongoose.js');
 
 var addToCart = (userId, prod) => {
   var newTotal;
   // Can we push new product docs within the below function?
-  Carts.findById(userId)
+  return Carts.findById(userId)
     .then((cartObj) => {
       // We probably need a new another .then after this first line...
       // ...since it's an async function.

@@ -2,6 +2,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var bodyparser = require('body-parser');
 
+mongoose.Promise = require('bluebird');
 mongoose.connect('mongodb://localhost/cart', {useMongoClient: true});
 
 var db = mongoose.connection;
