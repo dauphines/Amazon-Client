@@ -1,20 +1,20 @@
 const apm = require('elastic-apm-node').start({
-  appName: 'Amazon-Client-Service',
-  serverUrl: 'http://localhost:3000',
+  appName: 'amazon-client',
+  serverUrl: 'http://localhost:7331',
 });
 const express = require('express');
-const app = express();
 const Promise = require('bluebird');
 // add urlParser
 const bodyParser = require('body-parser');
-const mongo = require('./mongoose-helpers.js');
+const mongo = require('./mongodb/mongoose-helpers.js');
+// const redis = require('./redis/redis.js');
+
+const app = express();
 
 // ============= MIDDLEWARE ==============
-app.use(bodyParser);
-app.use(urlParser);
+app.use(bodyParser.json());
+// app.use(urlParser);
 
-// ============= LOADTESTING =============
-app.user(apm.middleware.express());
 
 // ============= CLIENT APP ==============
 
@@ -29,12 +29,12 @@ app.get('/s/field-keywords=', (req, res) => {
 
 // View product page
 // To do: add product id after the slash
-app.get('/product/', (req, res) => {
+app.get('/product', (req, res) => {
 
 });
 
 // Add to cart
-app.put('/cart/add/', (req, res) => {
+app.put('/cart/add', (req, res) => {
   mongo.addToCart(req.body.userId, req.body.product)
     .then(() => {
       res.send(201);
@@ -48,7 +48,7 @@ app.put('/cart/add/', (req, res) => {
 
 
 // Remove from cart
-app.put('/cart/remove/', (req, res) => {
+app.put('/cart/remove', (req, res) => {
   mongo.removeFromCart(req.userId, req.productId)
     .then(() => {
       res.send(201);
@@ -80,5 +80,7 @@ app.get('', (req, res) => {
 
 });
 
+// ============= LOADTESTING =============
+app.use(apm.middleware.express());
 
 app.listen(7331, () => console.log('Amazon Client app listening on port 3000!'));
