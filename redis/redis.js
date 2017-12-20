@@ -1,23 +1,11 @@
-var redis = require('redis');
-var client = redis.createClient();
-
-// if you'd like to select database 3, instead of 0 (default), call 
-// client.select(3, function() { /* ... */ }); 
+const RedisServer = require('redis-server');
  
-client.on('error', function (err) {
-  console.log('Error ' + err);
+const server = new RedisServer({
+  // This path will need to be abstracted away
+  conf: '/Users/Tim/Documents/HRSF84/repos/thesis/hrsf84-thesis/redis/redis.conf'
 });
 
-/*
-PLACEHOLDER EXAMPLE CODE
-client.set('string key', 'string val', redis.print);
-client.hset('hash key', 'hashtest 1', 'some value', redis.print);
-client.hset(['hash key', 'hashtest 2', 'some other value'], redis.print);
-client.hkeys('hash key', function (err, replies) {
-  console.log(replies.length + ' replies:');
-  replies.forEach(function (reply, i) {
-    console.log('    ' + i + ': ' + reply);
-  });
-  client.quit();
+server.open().then(() => {
+  // To do: investigate why console.log is not printing
+  console.log('The Redis cache is up on and running');
 });
-*/
