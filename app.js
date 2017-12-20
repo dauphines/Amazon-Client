@@ -5,20 +5,22 @@ const apm = require('elastic-apm-node').start({
 const express = require('express');
 const Promise = require('bluebird');
 // add urlParser
+const axios = require('axios');
 const bodyParser = require('body-parser');
-const mongo = require('./mongodb/mongoose-helpers.js');
-// const redis = require('./redis/redis.js');
+const mongo = require('./mongodb/mongoose.js');
+const redis = require('./redis/redis.js');
 
 const app = express();
 
 // ============= MIDDLEWARE ==============
 app.use(bodyParser.json());
-// app.use(urlParser);
-
 
 // ============= CLIENT APP ==============
 
 // Home page
+// To do: if we receive userId, check if there is existing cart
+// if there is existing cart, send cart object
+// else, send response with html...?
 app.get('/', (req, res) => res.send('Hello World!'));
 
 // Search
@@ -30,18 +32,21 @@ app.get('/s/field-keywords=', (req, res) => {
 // View product page
 // To do: add product id after the slash
 app.get('/product', (req, res) => {
-
+  // check to see if a product with given productId exists in cache
+    // if so, send client product details
+    // if not, fetch product details from inventory
+      // then send client product details
 });
 
 // Add to cart
 app.put('/cart/add', (req, res) => {
   mongo.addToCart(req.body.userId, req.body.product)
     .then(() => {
-      res.send(201);
+      res.sendStatus(201);
     })
     .catch(() => {
       // need to insert the correct 
-      res.send(501);
+      res.sendStatus(501);
     });
   req.body.product.productName === 'teapot' ? res.send(418) : null;
 });
@@ -51,17 +56,18 @@ app.put('/cart/add', (req, res) => {
 app.put('/cart/remove', (req, res) => {
   mongo.removeFromCart(req.userId, req.productId)
     .then(() => {
-      res.send(201);
+      res.sendStatus(201);
     })
     .catch(() => {
-      res.send(501);
+      res.sendStatus(501);
     });
 });
 
 
 // Make purhcase
 app.post('', (req, res) => {
-
+  // fetch purchase 
+    // upon response, tell client if there was success or failure
 });
 
 
@@ -72,12 +78,18 @@ app.post('', (req, res) => {
 
 // Update with New Product
 app.get('', (req, res) => {
-
+  // insert a new product object into the ES database
+    // if success, respond with success
+    // if failure, respond with failure
 });
 
 // Update with more Quantity of Existing Product
 app.get('', (req, res) => {
-
+  // check to see if an item exists in the Redis cache
+    // if it does, update its quantity with the new Q
+    // respond to inventory with success or failure
+  // if it does not find product, tell the inventory service
+  // ...that we did not update cache
 });
 
 // ============= LOADTESTING =============
