@@ -7,5 +7,6 @@ const server = new RedisServer({
 
 server.open().then(() => {
   // To do: investigate why console.log is not printing
+  
   console.log('The Redis cache is up on and running');
 });
