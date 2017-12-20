@@ -26,6 +26,7 @@
     "mongodb": "^3.0.0-rc0",
     "mongoose": "^4.13.7",
     "node": "^9.2.0",
-    "redis": "^2.8.0"
+    "redis": "^2.8.0",
+    "redis-server": "^1.1.0"
   }
 }
