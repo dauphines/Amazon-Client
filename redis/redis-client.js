@@ -7,3 +7,6 @@ var client = redis.createClient();
 client.on('error', function (err) {
   console.log('Error ' + err);
 });
+
+// write stub for retrieving a productObj from Redis
+
