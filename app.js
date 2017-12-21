@@ -38,10 +38,23 @@ app.get('/s/field-keywords=:search', (req, res) => {
 // View product page
 app.get('/product/:productId', (req, res) => {
   var productId = req.params.productId;
-  // check to see if a product with given productId exists in cache
-    // if so, send client product details
-    // if not, fetch product details from inventory
-      // then send client product details
+  redisClient.getProduct(productId)
+    .then((redisRes) => {
+      if (redisRes !== undefined) {
+        res.send(redisRes);
+      } else {
+        axios({
+          method: 'get',
+          url: '/inv/:itemId',
+          baseURL: '', // needs to be updated to Inventory location
+        })
+          .then((invRes) => {
+            var prodObj = redisClient.parseProduct(invRes);
+            res.send(prodObj);
+            redisClient.storeProduct(prodObj);
+          });
+      }
+    });
 });
 
 // Add to cart
