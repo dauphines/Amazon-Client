@@ -1,14 +1,16 @@
-const apm = require('elastic-apm-node').start({
-  appName: 'amazon-client',
-  serverUrl: 'http://localhost:7331',
-});
+// const apm = require('elastic-apm-node').start({
+//   appName: 'amazon-client',
+//   serverUrl: 'http://localhost:7331',
+// });
 const express = require('express');
 const Promise = require('bluebird');
 // add urlParser
 const axios = require('axios');
 const bodyParser = require('body-parser');
 const mongo = require('./mongodb/mongoose.js');
-const redis = require('./redis/redis.js');
+const redisServer = require('./redis/redis-server.js');
+const esClient = require('./es/elastic-search.js');
+const redisClient = require('./redis/redis-client.js');
 
 const app = express();
 
@@ -18,10 +20,12 @@ app.use(bodyParser.json());
 // ============= CLIENT APP ==============
 
 // Home page
-// To do: if we receive userId, check if there is existing cart
-// if there is existing cart, send cart object
-// else, send response with html...?
 app.get('/', (req, res) => res.send('Hello World!'));
+
+// Redirected to home with userId to get cart products
+app.get('/home', (req, res) => {
+
+});
 
 // Search
 // To do: add search term to be dynamically put in after keywords
@@ -44,8 +48,9 @@ app.put('/cart/add', (req, res) => {
     .then(() => {
       res.sendStatus(201);
     })
-    .catch(() => {
+    .catch((err) => {
       // need to insert the correct 
+      console.log(err);
       res.sendStatus(501);
     });
   req.body.product.productName === 'teapot' ? res.send(418) : null;
@@ -54,7 +59,7 @@ app.put('/cart/add', (req, res) => {
 
 // Remove from cart
 app.put('/cart/remove', (req, res) => {
-  mongo.removeFromCart(req.userId, req.productId)
+  mongo.removeFromCart(req.body.userId, req.body.productId)
     .then(() => {
       res.sendStatus(201);
     })
@@ -93,6 +98,6 @@ app.get('', (req, res) => {
 });
 
 // ============= LOADTESTING =============
-app.use(apm.middleware.express());
+// app.use(apm.middleware.express());
 
 app.listen(7331, () => console.log('Amazon Client app listening on port 3000!'));
