@@ -10,9 +10,9 @@ db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function() {
   console.log('We\'ve connected to MongoDB');
 });
-
+/*
 var productSchema = mongoose.Schema({
-  productId: Number,
+  productId: String,
   productName: String,
   price: Number,
   vendorName: String,
@@ -20,10 +20,9 @@ var productSchema = mongoose.Schema({
   quantity: Number,
   isPrimeProduct: Boolean,
 });
-
-// Might need to handleIds as something other than Numbers
+*/
 var cartSchema = mongoose.Schema({
-  userId: Number,
+  userId: String,
   fullName: String,
   phone: String,
   products: [
@@ -50,57 +49,30 @@ var cartSchema = mongoose.Schema({
   }
 });
 
-var Carts = mongoose.model('Carts', cartSchema);
-var Products = mongoose.model('Products', productSchema);
+var Carts = mongoose.model('carts', cartSchema);
 
-var addToCart = (userId, prod) => {
-  var newTotal;
-  // Can we push new product docs within the below function?
-  return Carts.findById(userId)
-    .then((cartObj) => {
-      // We probably need a new another .then after this first line...
-      // ...since it's an async function.
-      cartObj.products.push(prod);
-      cartObj.produts.forEach((productObj) => {
-        newTotal += productObj.price;
-      });
-      cartObj.cartTotal = newTotal;
-      return cartObj.cartTotal;
-    })
-    // Do we need to change anything to make this error handling get...
-    //... picked up by Kibana?
-    .catch((err) => {
-      throw err;
-    });
+module.exports.addToCart = (amznUserId, product) => {
+  var prod = {
+    'productId': product.productId,
+    'productName': product.productName,
+    'price': product.price,
+    'vendorName': product.vendorName,
+    'quantity': product.quantity,
+    'isPrimeProduct': product.isPrimeProduct,
+  };
+  return Carts.findOneAndUpdate({userId: amznUserId}, {$push: {products: prod}});
 };
 
-var removeFromCart = (userId, productId) => {
-  var newTotal;
-
-  // find the user's cart object in MongoDB via userID
-  Carts.findById(userId)
-  // access the user's products prop
-  // remove the product at prodInd
-    .then((cartObj) => {
-      // We probably need to add a .then after the first line.
-      cartObj.products.pull(productId);
-
-      // calculate the total of all current products
-      cartObj.products.forEach((product) => {
-        newTotal += product.price;
-      });
-      // set the cartTotal to the current total
-      cartObj.cartTotal = newTotal;
-      return cartObj.cartTotal;
-    })
-    .catch((err) => {
-      throw err;
-    });
+module.exports.removeFromCart = (amznUserId, thisProdId) => {
+  return Carts.findOneAndUpdate({userId: amznUserId}, {$pull: {products: {productId: thisProdId}}});
 };
 
 // write funciton to reset products and cartTotal upon purchase
+module.exports.clearCart = (amznUserId) => {
+  return Carts.findOneAndUpdate({userId: amznUserId}, {products: []});
+};
 
-
-
-module.exports.addToCart = addToCart;
-module.exports.removeFromCart = removeFromCart;
+// write function to return array of products
+module.exports.getCart = (amznUserId) => {
+  return Carts.findOne({userId: amznUserId}, 'products');
+};
