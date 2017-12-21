@@ -49,8 +49,6 @@ app.put('/cart/add', (req, res) => {
       res.sendStatus(201);
     })
     .catch((err) => {
-      // need to insert the correct 
-      console.log(err);
       res.sendStatus(501);
     });
   req.body.product.productName === 'teapot' ? res.send(418) : null;
@@ -70,26 +68,48 @@ app.put('/cart/remove', (req, res) => {
 
 
 // Make purhcase
-app.post('', (req, res) => {
-  // fetch purchase 
+app.post('/buy/purchase', (req, res) => {
+  mongo.getCart(req.userId)
+    .then((cart) => {
+      var transCart = cart;
+      cartTotal;
+      cart.products.forEach((product) => cartTotal += product.price);
+      transCart.cartTotal = cartTotal;
+      return axios();
+    })
     // upon response, tell client if there was success or failure
+    .then((transRes) =>{
+      transRes === 'good' ? res.sendStatus(201) : res.sendStatus(501);
+    });
 });
 
+// Subscribe
+app.post('/account/prime/subscribe', (req, res) => {
+  axios(/*Fill in with POST to transactions*/)
+    .then((transRes) => {
+      transRes === 'good' ? res.sendStatus(201) : res.sendStatus(501);
+    });
+});
 
-
-
+// Unsubscribe
+app.post('/account/prime/Unsubscribe', (req, res) => {
+  axios(/*Fill in with POST to transactions*/)
+    .then((transRes) => {
+      transRes === 'good' ? res.sendStatus(201) : res.sendStatus(501);
+    });
+});
 
 // ========== INVENTORY SERVICE ==============
 
 // Update with New Product
-app.get('', (req, res) => {
+app.get('/inv/new-product', (req, res) => {
   // insert a new product object into the ES database
     // if success, respond with success
     // if failure, respond with failure
 });
 
 // Update with more Quantity of Existing Product
-app.get('', (req, res) => {
+app.get('/inv/update-quantity', (req, res) => {
   // check to see if an item exists in the Redis cache
     // if it does, update its quantity with the new Q
     // respond to inventory with success or failure
