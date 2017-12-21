@@ -23,19 +23,20 @@ app.use(bodyParser.json());
 app.get('/', (req, res) => res.send('Hello World!'));
 
 // Redirected to home with userId to get cart products
-app.get('/home', (req, res) => {
-
+app.get('/home/:userId', (req, res) => {
+  var userId = req.params.userId;
 });
 
 // Search
 // To do: add search term to be dynamically put in after keywords
-app.get('/s/field-keywords=', (req, res) => {
-
+app.get('/s/field-keywords=:search', (req, res) => {
+  var s = req.params.search;
 });
 
 // View product page
 // To do: add product id after the slash
-app.get('/product', (req, res) => {
+app.get('/product/:productId', (req, res) => {
+  var productId = req.params.productId;
   // check to see if a product with given productId exists in cache
     // if so, send client product details
     // if not, fetch product details from inventory
