@@ -25,6 +25,7 @@
     "express": "^4.16.2",
     "faker": "^4.1.0",
     "jsonfile": "^4.0.0",
+    "moment": "^2.20.1",
     "mongodb": "^3.0.0-rc0",
     "mongoose": "^4.13.7",
     "node": "^9.2.0",
