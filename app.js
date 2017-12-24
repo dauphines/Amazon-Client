@@ -24,8 +24,13 @@ app.get('/', (req, res) => res.send('Hello World!'));
 // Redirected to home with userId to get cart products
 app.get('/home/:userId', (req, res) => {
   var userId = req.params.userId;
-  // get products from mongo
-  // send productes to application
+  mongo.getCart(userId)
+    .then((cart) => {
+      res.send(cart);
+    })
+    .catch(() => {
+      res.sendStatus(501);
+    });
 });
 
 // Search
