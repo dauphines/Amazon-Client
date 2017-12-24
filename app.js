@@ -136,10 +136,14 @@ app.post('/account/prime/Unsubscribe', (req, res) => {
 // ========== INVENTORY SERVICE ==============
 
 // Update with New Product
-app.get('/inv/new-product', (req, res) => {
-  // insert a new product object into the ES database
-    // if success, respond with success
-    // if failure, respond with failure
+app.post('/inv/new-product', (req, res) => {
+  esClient.addProduct(req.body.product)
+    .then(() => {
+      res.sendStatus(201);
+    })
+    .catch((err) => {
+      res.sendStatus(501);
+    });
 });
 
 // Update with more Quantity of Existing Product
