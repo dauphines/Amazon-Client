@@ -1,15 +1,15 @@
-const apm = require('elastic-apm-node').start({
-  appName: 'amazon-client',
-  serverUrl: 'http://localhost:7331',
-});
+// const apm = require('elastic-apm-node').start({
+//   appName: 'amazon-client',
+//   serverUrl: 'http://localhost:7331',
+// });
 const express = require('express');
 const Promise = require('bluebird');
 const axios = require('axios');
 const bodyParser = require('body-parser');
 const mongo = require('./mongodb/mongoose.js');
 const redisServer = require('./redis/redis-server.js');
-const esClient = require('./es/elastic-search.js');
-const redisClient = require('./redis/redis-client.js');
+const esClient = require('./es/esClient.js');
+// const redisClient = require('./redis/redis-client.js');
 
 const app = express();
 
@@ -31,8 +31,15 @@ app.get('/home/:userId', (req, res) => {
 // Search
 app.get('/s/field-keywords=:search', (req, res) => {
   var s = req.params.search;
-  // Kick off ES search from query
-  // send array of products to application
+  
+  esClient.queryResults(s)
+    .then((searchResults) => {
+      res.send(searchResults.hits.hits);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.sendStatus(501);
+    });
 });
 
 // View product page
@@ -145,6 +152,6 @@ app.get('/inv/update-quantity', (req, res) => {
 });
 
 // ============= LOADTESTING =============
-app.use(apm.middleware.express());
+// app.use(apm.middleware.express());
 
 app.listen(7331, () => console.log('Amazon Client app listening on port 3000!'));

@@ -7,23 +7,21 @@ var client = new elasticsearch.Client({
 const INDEX = 'products';
 const TYPE = 'productSearchResult';
 
-
-/*
-Switch to add products to search:
-const addVideoEntry = video => (
+// Switch to add products to search:
+const addProduct = product => (
   new Promise((resolve, reject) => {
     client.create({
       index: INDEX,
       type: 'products',
-      body: video,
+      body: product,
     }, (error, response) => {
       if (error) reject(error);
       else resolve(response);
     });
   })
 );
-*/
 
+// Bulk insert list of products form JSON file
 const batchInsertProducts = (products) => {
   const body = [];
   const action = {
@@ -33,8 +31,8 @@ const batchInsertProducts = (products) => {
     },
   };
 
-  // add videos to body
-  products.forEach(video => body.push(action, video));
+  // Add products to body
+  products.forEach(product => body.push(action, product));
 
   return new Promise((resolve, reject) => {
     client.bulk({ body }, (error, response) => {
@@ -44,19 +42,28 @@ const batchInsertProducts = (products) => {
   });
 };
 
-/*
+// Search for products
 const queryResults = q => (
   new Promise((resolve, reject) => {
-    client.search({ q, index: INDEX }, (error, response) => {
+    client.search({
+      index: INDEX,
+      body: {
+        query: {
+          match: {
+            productName: q
+          }
+        },
+      }
+    }, (error, response) => {
       if (error) reject(error);
       else resolve(response);
     });
   })
 );
-*/
+
 
 module.exports = {
-  // addVideoEntry,
+  addProduct,
   batchInsertProducts,
-  // queryResults,
+  queryResults,
 };
