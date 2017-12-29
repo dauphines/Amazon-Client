@@ -73,7 +73,7 @@ app.get('/product/:productId', (req, res) => {
 app.put('/cart/add', (req, res) => {
   mongo.addToCart(req.body.userId, req.body.product)
     .then(() => {
-      res.sendStatus(201);
+      res.sendStatus(200);
     })
     .catch((err) => {
       res.sendStatus(501);
@@ -85,7 +85,7 @@ app.put('/cart/add', (req, res) => {
 app.put('/cart/remove', (req, res) => {
   mongo.removeFromCart(req.body.userId, req.body.productId)
     .then(() => {
-      res.sendStatus(201);
+      res.sendStatus(200);
     })
     .catch(() => {
       res.sendStatus(501);
@@ -119,7 +119,7 @@ app.post('/account/prime/subscribe', (req, res) => {
     }
   })
     .then((transRes) => {
-      transRes === 'good' ? res.sendStatus(201) : res.sendStatus(501);
+      transRes === 'good' ? res.sendStatus(200) : res.sendStatus(501);
     });
 });
 
@@ -134,7 +134,7 @@ app.post('/account/prime/Unsubscribe', (req, res) => {
     }
   })
     .then((transRes) => {
-      transRes === 'good' ? res.sendStatus(201) : res.sendStatus(501);
+      transRes === 'good' ? res.sendStatus(200) : res.sendStatus(501);
     });
 });
 
@@ -152,12 +152,22 @@ app.post('/inv/new-product', (req, res) => {
 });
 
 // Update with more Quantity of Existing Product
-app.get('/inv/update-quantity', (req, res) => {
-  // check to see if an item exists in the Redis cache
-    // if it does, update its quantity with the new Q
-    // respond to inventory with success or failure
-  // if it does not find product, tell the inventory service
-  // ...that we did not update cache
+app.post('/inv/update-quantity', (req, res) => {
+  var productId = req.body.productId;
+  var q = req.body.quantity;
+  redisClient.updateQuantity(productId, q)
+    .then((resp) => {
+      if (resp === 'not found') {
+        res.sendStatus(204);
+      }
+      if (resp === 'stored') {
+        res.sendStatus(202);
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+      res.sendStatus(501);
+    });
 });
 
 // ============= LOADTESTING =============

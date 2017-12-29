@@ -10,7 +10,7 @@ db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function() {
   console.log('We\'ve connected to MongoDB');
 });
-/*
+
 var productSchema = mongoose.Schema({
   productId: String,
   productName: String,
@@ -20,7 +20,7 @@ var productSchema = mongoose.Schema({
   quantity: Number,
   isPrimeProduct: Boolean,
 });
-*/
+
 var cartSchema = mongoose.Schema({
   userId: String,
   fullName: String,

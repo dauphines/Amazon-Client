@@ -48,7 +48,24 @@ module.exports.getProduct = (productId) => {
         reject(err);
       }
       return resolve(JSON.parse(obj));
-    }
-    );
+    });
+  });
+};
+
+module.exports.updateQuantity = (prodId, quantity) => {
+  return new Promise( (resolve, reject) => {
+    module.exports.getProduct(prodId)
+      .then((prod) => {
+        if (prod === null) {
+          resolve('not found');
+        }
+        var updatedProduct = prod;
+        updatedProduct.quantity = quantity;
+        module.exports.storeProduct(updatedProduct);
+        resolve('stored');
+      })
+      .catch((err) => {
+        reject(err);
+      });
   });
 };
