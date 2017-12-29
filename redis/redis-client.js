@@ -1,5 +1,6 @@
 var redis = require('redis');
 var rejson = require('redis-rejson');
+var Promise = require('bluebird');
 rejson(redis);
 
 var client = redis.createClient(6378);
@@ -41,11 +42,13 @@ module.exports.storeProduct = (prodObj) =>{
 };
 
 module.exports.getProduct = (productId) => {
-  return client.json_get(productId, (err, obj) => {
-    if (err) {
-      throw err;
+  return new Promise( (resolve, reject) => {
+    client.json_get(productId, (err, obj) => {
+      if (err) {
+        reject(err);
+      }
+      return resolve(JSON.parse(obj));
     }
-    console.log(JSON.parse(obj));
-    return JSON.parse(obj);
+    );
   });
 };
