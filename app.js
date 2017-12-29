@@ -7,9 +7,9 @@ const Promise = require('bluebird');
 const axios = require('axios');
 const bodyParser = require('body-parser');
 const mongo = require('./mongodb/mongoose.js');
-const redisServer = require('./redis/redis-server.js');
+const redis = require('redis');
 const esClient = require('./es/esClient.js');
-// const redisClient = require('./redis/redis-client.js');
+const redisClient = require('./redis/redis-client.js');
 
 const app = express();
 

@@ -41,6 +41,11 @@ module.exports.storeProduct = (prodObj) =>{
 };
 
 module.exports.getProduct = (productId) => {
-  console.log('The object at', productId, ':', client.json_get(productId));
-  return client.json_get(productId);
+  return client.json_get(productId, (err, obj) => {
+    if (err) {
+      throw err;
+    }
+    console.log(JSON.parse(obj));
+    return JSON.parse(obj);
+  });
 };
