@@ -4,12 +4,11 @@
 // });
 const express = require('express');
 const Promise = require('bluebird');
-// add urlParser
 const axios = require('axios');
 const bodyParser = require('body-parser');
 const mongo = require('./mongodb/mongoose.js');
-const redisServer = require('./redis/redis-server.js');
-const esClient = require('./es/elastic-search.js');
+const redis = require('redis');
+const esClient = require('./es/esClient.js');
 const redisClient = require('./redis/redis-client.js');
 
 const app = express();
@@ -25,34 +24,60 @@ app.get('/', (req, res) => res.send('Hello World!'));
 // Redirected to home with userId to get cart products
 app.get('/home/:userId', (req, res) => {
   var userId = req.params.userId;
+  mongo.getCart(userId)
+    .then((cart) => {
+      res.send(cart);
+    })
+    .catch(() => {
+      res.sendStatus(501);
+    });
 });
 
 // Search
-// To do: add search term to be dynamically put in after keywords
 app.get('/s/field-keywords=:search', (req, res) => {
   var s = req.params.search;
+  
+  esClient.queryResults(s)
+    .then((searchResults) => {
+      res.send(searchResults.hits.hits);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.sendStatus(501);
+    });
 });
 
 // View product page
-// To do: add product id after the slash
 app.get('/product/:productId', (req, res) => {
   var productId = req.params.productId;
-  // check to see if a product with given productId exists in cache
-    // if so, send client product details
-    // if not, fetch product details from inventory
-      // then send client product details
+  redisClient.getProduct(productId)
+    .then((redisRes) => {
+      if (redisRes !== undefined) {
+        res.send(redisRes);
+      } else {
+        axios({
+          method: 'get',
+          url: '/inv/:itemId',
+          baseURL: '', // needs to be updated to Inventory location
+        })
+          .then((invRes) => {
+            var prodObj = redisClient.parseProduct(invRes);
+            res.send(prodObj);
+            redisClient.storeProduct(prodObj);
+          });
+      }
+    });
 });
 
 // Add to cart
 app.put('/cart/add', (req, res) => {
   mongo.addToCart(req.body.userId, req.body.product)
     .then(() => {
-      res.sendStatus(201);
+      res.sendStatus(200);
     })
     .catch((err) => {
       res.sendStatus(501);
     });
-  req.body.product.productName === 'teapot' ? res.send(418) : null;
 });
 
 
@@ -60,7 +85,7 @@ app.put('/cart/add', (req, res) => {
 app.put('/cart/remove', (req, res) => {
   mongo.removeFromCart(req.body.userId, req.body.productId)
     .then(() => {
-      res.sendStatus(201);
+      res.sendStatus(200);
     })
     .catch(() => {
       res.sendStatus(501);
@@ -70,52 +95,79 @@ app.put('/cart/remove', (req, res) => {
 
 // Make purhcase
 app.post('/buy/purchase', (req, res) => {
-  mongo.getCart(req.userId)
-    .then((cart) => {
-      var transCart = cart;
-      cartTotal;
-      cart.products.forEach((product) => cartTotal += product.price);
-      transCart.cartTotal = cartTotal;
-      return axios();
-    })
-    // upon response, tell client if there was success or failure
+  axios({
+    method: 'post',
+    url: '/processTrans',
+    baseURL: '', // needs to be updated to Transactions' location
+    data: {
+      cart: req.body.cart,
+    }
+  })
     .then((transRes) =>{
-      transRes === 'good' ? res.sendStatus(201) : res.sendStatus(501);
+      transRes === 'good' ? res.sendStatus(201) && mongo.clearCart(req.userId) : res.sendStatus(501);
     });
 });
 
 // Subscribe
 app.post('/account/prime/subscribe', (req, res) => {
-  axios(/*Fill in with POST to transactions*/)
+  axios({
+    method: 'post',
+    url: '/subscribe',
+    baseURL: '', // needs to be updated to Transactions' location
+    data: {
+      userId: req.body.userId,
+    }
+  })
     .then((transRes) => {
-      transRes === 'good' ? res.sendStatus(201) : res.sendStatus(501);
+      transRes === 'good' ? res.sendStatus(200) : res.sendStatus(501);
     });
 });
 
 // Unsubscribe
 app.post('/account/prime/Unsubscribe', (req, res) => {
-  axios(/*Fill in with POST to transactions*/)
+  axios({
+    method: 'post',
+    url: '/Unsubscribe',
+    baseURL: '', // needs to be updated to Transactions' location
+    data: {
+      userId: req.body.userId,
+    }
+  })
     .then((transRes) => {
-      transRes === 'good' ? res.sendStatus(201) : res.sendStatus(501);
+      transRes === 'good' ? res.sendStatus(200) : res.sendStatus(501);
     });
 });
 
 // ========== INVENTORY SERVICE ==============
 
 // Update with New Product
-app.get('/inv/new-product', (req, res) => {
-  // insert a new product object into the ES database
-    // if success, respond with success
-    // if failure, respond with failure
+app.post('/inv/new-product', (req, res) => {
+  esClient.addProduct(req.body.product)
+    .then(() => {
+      res.sendStatus(201);
+    })
+    .catch((err) => {
+      res.sendStatus(501);
+    });
 });
 
 // Update with more Quantity of Existing Product
-app.get('/inv/update-quantity', (req, res) => {
-  // check to see if an item exists in the Redis cache
-    // if it does, update its quantity with the new Q
-    // respond to inventory with success or failure
-  // if it does not find product, tell the inventory service
-  // ...that we did not update cache
+app.post('/inv/update-quantity', (req, res) => {
+  var productId = req.body.productId;
+  var q = req.body.quantity;
+  redisClient.updateQuantity(productId, q)
+    .then((resp) => {
+      if (resp === 'not found') {
+        res.sendStatus(204);
+      }
+      if (resp === 'stored') {
+        res.sendStatus(202);
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+      res.sendStatus(501);
+    });
 });
 
 // ============= LOADTESTING =============
